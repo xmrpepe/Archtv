@@ -90,11 +90,16 @@ android {
         resources.excludes += setOf("META-INF/{AL2.0,LGPL2.1}", "META-INF/LICENSE*", "META-INF/NOTICE*")
     }
 
+    // One flavor per build: "x11" when Termux:X11 is embedded (its source set
+    // carries the Application base class and a manifest that drops Termux:X11's
+    // launcher entries), "vnc" otherwise.
+    flavorDimensions += "display"
+    productFlavors {
+        create(if (withX11) "x11" else "vnc") { dimension = "display" }
+    }
+
     sourceSets {
         getByName("main") {
-            val variantSrc = if (withX11) "src/x11/java" else "src/nox11/java"
-            java.srcDir(variantSrc)
-            kotlin.srcDir(variantSrc)
             // Theme files and rootfs scripts live at the repo root so they can
             // be edited without touching app code; they are packaged as assets.
             assets.srcDir(rootProject.file("dotfiles"))
@@ -127,7 +132,6 @@ dependencies {
 
     if (withX11) {
         implementation(project(":lorie"))
-        implementation(project(":x11-embed"))
     }
 
     testImplementation(libs.junit)

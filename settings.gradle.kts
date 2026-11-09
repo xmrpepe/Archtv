@@ -35,6 +35,7 @@ if (x11Wanted && x11Present) {
     include(":lorie")
     project(":lorie").projectDir = File(x11Root, "lorie")
     include(":shell-loader:stub")
+    // Only the stub is needed; the real :shell-loader build script expects Termux:X11's own app module.
+    project(":shell-loader").projectDir = file("gradle/shell-loader-parent")
     project(":shell-loader:stub").projectDir = File(x11Root, "shell-loader/stub")
-    include(":x11-embed")
 }

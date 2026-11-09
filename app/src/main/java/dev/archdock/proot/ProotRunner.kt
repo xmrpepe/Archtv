@@ -67,6 +67,7 @@ class ProotRunner(private val paths: Paths) {
             "--kill-on-exit",
             "--link2symlink",
             "--sysvipc",
+            "--ashmem-memfd",
             "-L",
             "--kernel-release=6.1.0-archdock",
             "--rootfs=$rootfs",
