@@ -109,19 +109,14 @@ class GpuManager(private val context: Context, private val paths: Paths, private
             return false
         }
         val sock = File(paths.guestTmp, SOCKET).apply { delete() }
-        val icdDir = File(paths.files, "vulkan").apply { mkdirs() }
-        // ICD manifest for the bundled Khronos loader → Mesa wrapper → system libvulkan.so.
-        val icd = File(icdDir, "wrapper_icd.json").apply {
-            writeText("""{"file_format_version":"1.0.1","ICD":{"library_path":"${wrapperLib.absolutePath}","api_version":"1.3.0"}}""")
-        }
         val args = mutableListOf(serverBinary.absolutePath, "--use-gles", "--socket-path", sock.absolutePath)
         if (mode == GpuMode.VULKAN_WRAPPER) args += "--venus"
         server = ManagedProcess.startHost("virgl", args, mapOf(
             "LD_LIBRARY_PATH" to paths.nativeLibDir.absolutePath,
-            "VK_ICD_FILENAMES" to icd.absolutePath,
-            "VK_DRIVER_FILES" to icd.absolutePath,
+            // libvulkan_archdock.so: Mesa wrapper ICD if bundled, else the system driver.
+            "ARCHDOCK_VK_DRIVER" to if (wrapperLib.exists()) "wrapper" else "system",
+            "VTEST_RENDERER_SOCKET_NAME" to sock.absolutePath,
             "TMPDIR" to paths.guestTmp.absolutePath,
-            "MESA_VK_WSI_PRESENT_MODE" to "mailbox",
         ), Logs.Channel.GPU)
         repeat(50) {
             if (sock.exists()) return true

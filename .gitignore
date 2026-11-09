@@ -13,3 +13,6 @@ build/
 *.keystore
 *.jks
 !app/debug-signing.jks
+
+# Built by scripts/build-*.sh (not committed)
+/app/src/main/jniLibs/arm64-v8a/*.so
