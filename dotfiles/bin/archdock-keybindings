@@ -1,0 +1,23 @@
+#!/bin/bash
+# Keybinding cheatsheet (Super+K).
+cat <<'KEYS' | rofi -dmenu -i -p "Keybindings" -theme "$HOME/.config/rofi/theme.rasi" -theme-str 'window { width: 720px; } listview { lines: 18; }' >/dev/null
+Super + Enter                Terminal (Alacritty)
+Super + Space                App launcher
+Super + Alt + Space          ArchDock menu
+Super + Ctrl + Shift + Space Theme switcher
+Super + K                    This cheatsheet
+Super + W                    Close window
+Super + F                    Maximise / restore
+Super + Shift + F            Full screen
+Super + 1 … 9                Switch workspace
+Super + Shift + 1 … 9        Move window to workspace
+Super + B                    Browser (Firefox)
+Super + E                    Files (Caja)
+Super + N                    Neovim
+Super + T                    btop
+Super + G                    lazygit
+Super + Escape               Power menu
+Print                        Screenshot (region)
+Shift + Print                Screenshot (full screen)
+Alt + Tab                    Switch windows
+KEYS

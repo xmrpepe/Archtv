@@ -1,0 +1,50 @@
+#!/bin/bash
+# Omarchy-style menu (Super+Alt+Space): apps, themes, keybindings, update,
+# screenshot, power. `archdock-menu power` opens the power submenu directly.
+RT=/tmp/archdock
+menu() { rofi -dmenu -i -p "$1" -theme "$HOME/.config/rofi/theme.rasi" -theme-str 'window { width: 420px; } listview { lines: 9; }'; }
+
+power_menu() {
+  case $(printf '%s\n' "󰍃  Log out (restart desktop)" "󰜉  Restart ArchDock session" "󰐥  Stop ArchDock" | menu "Power") in
+    *"Log out"*) mate-session-save --logout-dialog 2>/dev/null || mate-session-save --force-logout ;;
+    *"Restart"*) touch "$RT/request-restart" ;;
+    *"Stop"*) touch "$RT/request-stop" ;;
+  esac
+}
+
+capture_menu() {
+  case $(printf '%s\n' "󰆞  Region" "󰍹  Full screen" "  Window" | menu "Screenshot") in
+    *Region*) sleep 0.2; archdock-screenshot region ;;
+    *Full*) sleep 0.3; archdock-screenshot full ;;
+    *Window*) sleep 0.3; archdock-screenshot window ;;
+  esac
+}
+
+update_menu() {
+  case $(printf '%s\n' "󰚰  Update system (pacman -Syu)" "  Re-apply theme" "  Restart compositor" | menu "Update") in
+    *pacman*) archdock-update ;;
+    *theme*) archdock-theme-set "$(cat "$HOME/.config/archdock/current-theme" 2>/dev/null || echo tokyo-night)" ;;
+    *compositor*) archdock-compositor restart ;;
+  esac
+}
+
+case ${1:-} in
+  power) power_menu; exit ;;
+  theme) archdock-theme-menu; exit ;;
+esac
+
+choice=$(printf '%s\n' \
+  "󰀻  Apps" "  Terminal" "  Files" "  Browser" \
+  "󰸌  Theme" "  Keybindings" "  Screenshot" "󰚰  Update" "  System monitor" "󰐥  Power" | menu "ArchDock")
+case $choice in
+  *Apps*) rofi -show drun -theme "$HOME/.config/rofi/theme.rasi" ;;
+  *Terminal*) alacritty ;;
+  *Files*) caja --no-desktop "$HOME" ;;
+  *Browser*) firefox ;;
+  *Theme*) archdock-theme-menu ;;
+  *Keybindings*) archdock-keybindings ;;
+  *Screenshot*) capture_menu ;;
+  *Update*) update_menu ;;
+  *monitor*) alacritty -e btop ;;
+  *Power*) power_menu ;;
+esac

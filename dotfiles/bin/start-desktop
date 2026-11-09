@@ -1,0 +1,58 @@
+#!/bin/bash
+# /usr/local/bin/start-desktop – started by ArchDock (as "user", DISPLAY set).
+# proot has no systemd/logind/udev, so this does by hand what a display
+# manager would: D-Bus session bus, PulseAudio, theme, then mate-session.
+set -u
+RT=/tmp/archdock
+mkdir -p "$RT/logs" "$RT/runtime-user"
+chmod 700 "$RT/runtime-user"
+[ -f "$RT/session.env" ] && . "$RT/session.env"
+export DISPLAY=${DISPLAY:-:0}
+export XDG_RUNTIME_DIR=$RT/runtime-user
+export XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=MATE XDG_SESSION_DESKTOP=mate DESKTOP_SESSION=mate
+export TERMINAL=alacritty BROWSER=firefox EDITOR=nvim VISUAL=nvim
+export NO_AT_BRIDGE=1                     # no accessibility bus in proot
+export GTK_OVERLAY_SCROLLING=1
+export MOZ_USE_XINPUT2=1
+export PATH=/opt/archdock/bin:$PATH
+log() { echo "[start-desktop] $*"; }
+
+# ---- D-Bus session bus -------------------------------------------------------
+if ! [ -S "${DBUS_SESSION_BUS_ADDRESS#unix:path=}" ] 2>/dev/null; then
+  eval "$(dbus-launch --sh-syntax --exit-with-x11)"
+fi
+{ echo "export DBUS_SESSION_BUS_ADDRESS='$DBUS_SESSION_BUS_ADDRESS'"; echo "export DBUS_SESSION_BUS_PID='${DBUS_SESSION_BUS_PID:-}'"; } >"$RT/dbus.env"
+log "dbus: $DBUS_SESSION_BUS_ADDRESS"
+
+# ---- First-login defaults (keybindings, fonts, panel layout, workspaces) ------
+if [ ! -f "$HOME/.config/archdock/dconf-loaded" ]; then
+  dconf load / </opt/archdock/config/dconf/archdock.dconf && mkdir -p "$HOME/.config/archdock" && touch "$HOME/.config/archdock/dconf-loaded"
+  log "loaded dconf defaults"
+fi
+
+# ---- Display: DPI and scale chosen in the Android app ------------------------
+xrdb -merge "$HOME/.Xresources" 2>/dev/null
+if [ -n "${ARCHDOCK_DPI:-}" ]; then
+  echo "Xft.dpi: $ARCHDOCK_DPI" | xrdb -merge
+  gsettings set org.mate.font-rendering dpi "$ARCHDOCK_DPI" 2>/dev/null
+fi
+gsettings set org.mate.interface window-scaling-factor "${GDK_SCALE:-1}" 2>/dev/null
+xsetroot -cursor_name left_ptr 2>/dev/null
+
+# ---- PulseAudio → ArchDock's AAudio bridge (see config/pulse/archdock.pa) ----
+pulseaudio --kill >/dev/null 2>&1
+pulseaudio -n -F /opt/archdock/config/pulse/archdock.pa --exit-idle-time=-1 \
+  --daemonize=yes --log-target="file:$RT/logs/pulseaudio.log" && log "pulseaudio up"
+
+# ---- Notifications first, so dunst owns org.freedesktop.Notifications --------
+pkill -u "$USER" -x dunst 2>/dev/null
+(dunst >"$RT/logs/dunst.log" 2>&1 &)
+
+# ---- Theme (the Android app's choice wins) ----------------------------------
+theme=${ARCHDOCK_THEME:-$(cat "$HOME/.config/archdock/current-theme" 2>/dev/null || echo tokyo-night)}
+archdock-theme-set "$theme" >"$RT/logs/theme.log" 2>&1 || log "theme failed (see theme.log)"
+
+rm -f "$RT/compositor.env"
+touch "$RT/desktop.ready"
+log "starting mate-session (renderer: ${ARCHDOCK_RENDERER:-?})"
+exec mate-session >"$RT/logs/mate-session.log" 2>&1

@@ -1,0 +1,15 @@
+.gradle/
+build/
+/local.properties
+/.idea/
+*.iml
+.DS_Store
+/captures
+.externalNativeBuild/
+.cxx/
+/third_party/termux-x11/
+/third_party/build/
+/out/
+*.keystore
+*.jks
+!app/debug-signing.jks

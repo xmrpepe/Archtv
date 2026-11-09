@@ -1,0 +1,44 @@
+# ArchDock: Omarchy-style launcher bindings (window/workspace keys are Marco's,
+# see config/dconf/archdock.dconf). Reload: pkill -USR1 -x sxhkd
+
+super + Return
+	alacritty
+
+super + space
+	rofi -show drun -theme ~/.config/rofi/theme.rasi
+
+super + alt + space
+	archdock-menu
+
+super + ctrl + shift + space
+	archdock-theme-menu
+
+super + k
+	archdock-keybindings
+
+super + Escape
+	archdock-menu power
+
+super + b
+	firefox
+
+super + e
+	caja --no-desktop ~
+
+super + n
+	alacritty -e nvim
+
+super + t
+	alacritty -e btop
+
+super + g
+	alacritty -e lazygit
+
+Print
+	archdock-screenshot region
+
+shift + Print
+	archdock-screenshot full
+
+alt + Print
+	archdock-screenshot window

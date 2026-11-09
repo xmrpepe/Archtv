@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Arch-style "A" over a dock bar, in Tokyo Night accent colours. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#7AA2F7"
+        android:pathData="M54,24 C51,32 48.5,38 44,46.5 C47,49 50.5,50.5 54,51 C51,52 47.5,53.5 42.5,49.5 C38,58 33,66.5 29,74 C36,70 42.5,67 49,66 C48,63 48,60 49.5,57.5 C51.5,54.5 56.5,54.5 58.5,57.5 C60,60 60,63 59,66 C65.5,67 72,70 79,74 C69.5,56 61.5,40.5 54,24 Z" />
+    <path android:fillColor="#BB9AF7"
+        android:pathData="M30,80 L78,80 Q80,80 80,82 L80,84 Q80,86 78,86 L30,86 Q28,86 28,84 L28,82 Q28,80 30,80 Z" />
+</vector>

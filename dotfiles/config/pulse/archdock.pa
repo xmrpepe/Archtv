@@ -1,0 +1,19 @@
+#!/usr/bin/pulseaudio -nF
+# ArchDock PulseAudio: no hardware in proot. Everything plays into a null sink
+# whose monitor is streamed as raw PCM to the Android app (AudioBridge →
+# AAudio), which outputs over HDMI while a TV is connected.
+.fail
+load-module module-null-sink sink_name=archdock sink_properties=device.description=ArchDock-HDMI rate=48000 channels=2 format=s16le
+set-default-sink archdock
+set-default-source archdock.monitor
+load-module module-native-protocol-unix
+# Network clients (e.g. other proot containers) on localhost only.
+load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1 port=4713 listen=127.0.0.1
+# The stream the Android app plays: s16le / 48 kHz / stereo.
+load-module module-simple-protocol-tcp source=archdock.monitor record=true playback=false port=4714 listen=127.0.0.1 format=s16le rate=48000 channels=2
+.nofail
+load-module module-always-sink
+load-module module-intended-roles
+load-module module-position-event-sounds
+load-module module-filter-heuristics
+load-module module-filter-apply

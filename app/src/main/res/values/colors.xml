@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tokyo Night (from Omarchy's tokyo-night/colors.toml) -->
+    <color name="tn_bg">#FF1A1B26</color>
+    <color name="tn_bg_dark">#FF13141C</color>
+    <color name="tn_fg">#FFA9B1D6</color>
+    <color name="tn_accent">#FF7AA2F7</color>
+    <color name="ic_launcher_background">#FF1A1B26</color>
+</resources>

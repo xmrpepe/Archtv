@@ -1,0 +1,6 @@
+#!/bin/bash
+# System update in a terminal (from the ArchDock menu).
+exec alacritty --title "System update" -e bash -c '
+  echo -e "\e[1;34m:: Updating Arch Linux ARM\e[0m"
+  sudo pacman -Syu
+  echo; read -n1 -rsp "Done – press any key to close"'

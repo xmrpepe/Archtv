@@ -1,0 +1,11 @@
+#!/bin/bash
+# Places the clock in the centre of the slim top panel (MATE has no
+# "centre" anchor, so compute it from the screen width) – run at login and
+# after resolution changes.
+sleep 3
+w=$(xdpyinfo 2>/dev/null | awk '/dimensions:/ { split($2, a, "x"); print a[1]; exit }')
+[ -z "$w" ] && exit 0
+scale=$(gsettings get org.mate.interface window-scaling-factor 2>/dev/null || echo 1)
+pos=$(( w / (scale > 0 ? scale : 1) / 2 - 70 ))
+dconf write /org/mate/panel/objects/clock/position "$pos" 2>/dev/null
+dconf write /org/mate/panel/objects/clock/panel-right-stick false 2>/dev/null

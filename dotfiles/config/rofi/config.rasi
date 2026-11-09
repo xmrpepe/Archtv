@@ -1,0 +1,14 @@
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+    drun-display-format: "{name}";
+    display-drun: "  ";
+    display-run: "  ";
+    display-window: "  ";
+    hover-select: true;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+    kb-cancel: "Escape,super+space";
+}
+@theme "~/.config/rofi/theme.rasi"

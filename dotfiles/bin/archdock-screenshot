@@ -1,0 +1,12 @@
+#!/bin/bash
+# archdock-screenshot region|full|window – saves to ~/Pictures/Screenshots and copies to the clipboard.
+dir=$(xdg-user-dir PICTURES 2>/dev/null || echo "$HOME/Pictures")/Screenshots
+mkdir -p "$dir"
+file="$dir/screenshot-$(date +%Y%m%d-%H%M%S).png"
+case ${1:-region} in
+  region) maim -s -u -b 2 -c 0.48,0.64,0.97,0.9 "$file" || exit 0 ;;
+  window) maim -u -i "$(xdotool getactivewindow)" "$file" ;;
+  *) maim -u "$file" ;;
+esac
+xclip -selection clipboard -t image/png -i "$file"
+notify-send -i "$file" "Screenshot saved" "$(basename "$file") – copied to clipboard"

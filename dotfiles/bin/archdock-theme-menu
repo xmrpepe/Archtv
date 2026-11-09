@@ -1,0 +1,13 @@
+#!/bin/bash
+# Theme picker (Super+Ctrl+Shift+Space). Switching is live – no logout.
+. /opt/archdock/bin/archdock-theme-lib.sh
+current=$(cat "$HOME/.config/archdock/current-theme" 2>/dev/null)
+list=""
+for t in $(theme_list); do
+  mark="  "; [ "$t" = "$current" ] && mark="󰄬 "
+  list+="$mark$(theme_title "$t")\n"
+done
+pick=$(printf "$list" | rofi -dmenu -i -p "Theme" -theme "$HOME/.config/rofi/theme.rasi" -theme-str 'window { width: 360px; }')
+[ -z "$pick" ] && exit 0
+id=$(echo "${pick:2}" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g')
+archdock-theme-set "$id"

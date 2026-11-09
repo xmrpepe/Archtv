@@ -1,0 +1,43 @@
+# ArchDock: one slim top bar like Omarchy's – menu + workspaces on the left,
+# clock in the middle (positioned by archdock-panel-setup), CPU + tray (volume,
+# network) on the right.
+[Toplevel top]
+expand=true
+orientation=top
+size=28
+
+[Object menu]
+object-type=menu
+toplevel-id=top
+position=0
+locked=true
+
+[Object workspaces]
+object-type=applet
+applet-iid=WnckletFactory::WorkspaceSwitcherApplet
+toplevel-id=top
+position=36
+locked=true
+
+[Object clock]
+object-type=applet
+applet-iid=ClockAppletFactory::ClockApplet
+toplevel-id=top
+position=880
+locked=true
+
+[Object cpu]
+object-type=applet
+applet-iid=MultiLoadAppletFactory::MultiLoadApplet
+toplevel-id=top
+position=120
+panel-right-stick=true
+locked=true
+
+[Object tray]
+object-type=applet
+applet-iid=NotificationAreaAppletFactory::NotificationArea
+toplevel-id=top
+position=10
+panel-right-stick=true
+locked=true

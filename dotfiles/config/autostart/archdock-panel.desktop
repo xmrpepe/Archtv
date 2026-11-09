@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=ArchDock panel layout
+Exec=/opt/archdock/bin/archdock-panel-setup
+X-MATE-Autostart-Phase=Applications
+NoDisplay=true

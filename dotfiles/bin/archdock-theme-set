@@ -1,0 +1,123 @@
+#!/bin/bash
+# archdock-theme-set <theme> – apply an Omarchy theme to the whole MATE desktop, live.
+# Renders templates, installs a generated GTK2/3/4 + Marco theme, recolours
+# Papirus folders, sets the wallpaper, and reloads panel, dunst, picom,
+# Alacritty, btop, Neovim and the shell prompt without logging out.
+set -uo pipefail
+. "$(dirname "$(readlink -f "$0")")/archdock-theme-lib.sh"
+
+id=${1:-}
+if [[ -z $id || $id == --list ]]; then theme_list; exit 0; fi
+theme_load "$id" || exit 1
+
+state=$HOME/.local/state/archdock/theme
+rm -rf "$state.new"
+theme_render "$id" "$state.new" || exit 1
+rm -rf "$state"; mv "$state.new" "$state"
+cp "${C[theme_dir]}/colors.toml" "$state/colors.toml"
+
+have() { command -v "$1" >/dev/null 2>&1; }
+gset() { have gsettings && gsettings set "$@" 2>/dev/null; }
+
+# --- GTK 2/3/4 + Marco: a generated theme per palette -------------------------
+tdir=$HOME/.themes/ArchDock-$id
+rm -rf "$tdir"; mkdir -p "$tdir"/{gtk-2.0,gtk-3.0,gtk-4.0,metacity-1}
+cp "$state/gtkrc" "$tdir/gtk-2.0/gtkrc"
+cp "$state/gtk3.css" "$tdir/gtk-3.0/gtk.css"
+cp "$state/gtk4.css" "$tdir/gtk-4.0/gtk.css"
+cp "$state/metacity-theme-3.xml" "$tdir/metacity-1/metacity-theme-3.xml"
+cp "$state/index.theme" "$tdir/index.theme"
+# libadwaita/GTK4 apps ignore the theme name and read ~/.config/gtk-4.0/gtk.css.
+mkdir -p "$HOME/.config/gtk-4.0"; cp "$state/gtk4.css" "$HOME/.config/gtk-4.0/gtk.css"
+# Old generated themes would just clutter the appearance dialog.
+for old in "$HOME"/.themes/ArchDock-*; do [[ $old != "$tdir" ]] && rm -rf "$old"; done
+
+# GTK2 apps read ~/.gtkrc-2.0.
+cat >"$HOME/.gtkrc-2.0" <<GTK2
+include "$tdir/gtk-2.0/gtkrc"
+gtk-theme-name="ArchDock-$id"
+gtk-icon-theme-name="${C[icon_theme]}"
+gtk-cursor-theme-name="Adwaita"
+gtk-font-name="Inter 10"
+GTK2
+mkdir -p "$HOME/.config/gtk-3.0"
+cat >"$HOME/.config/gtk-3.0/settings.ini" <<GTK3
+[Settings]
+gtk-theme-name=ArchDock-$id
+gtk-icon-theme-name=${C[icon_theme]}
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=24
+gtk-font-name=Inter 10
+gtk-application-prefer-dark-theme=$([[ ${C[mode]} == light ]] && echo 0 || echo 1)
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintslight
+gtk-xft-rgba=rgb
+GTK3
+
+# Changing the theme *name* makes running GTK apps and Marco reload it.
+gset org.mate.interface gtk-theme "ArchDock-$id"
+gset org.mate.interface icon-theme "${C[icon_theme]}"
+gset org.mate.interface gtk-color-scheme ""
+gset org.mate.Marco.general theme "ArchDock-$id"
+gset org.mate.peripherals-mouse cursor-theme "Adwaita"
+gset org.gnome.desktop.interface color-scheme "$([[ ${C[mode]} == light ]] && echo default || echo prefer-dark)"
+
+# --- Icons: Papirus with folders recoloured to the accent family -------------
+if have papirus-folders; then
+  sudo -n papirus-folders -C "${C[papirus_folder]}" --theme "${C[icon_theme]}" >/dev/null 2>&1 || true
+fi
+
+# --- Wallpaper ------------------------------------------------------------------
+wpdir=$HOME/.local/share/archdock/wallpapers/$id
+wall=""
+[[ -f $HOME/.config/archdock/wallpaper-$id ]] && wall=$(<"$HOME/.config/archdock/wallpaper-$id")
+[[ -f $wall ]] || wall=$(ls "$wpdir"/* 2>/dev/null | head -1)
+if [[ -n $wall && -f $wall ]]; then
+  gset org.mate.background picture-filename "$wall"
+  gset org.mate.background picture-options "zoom"
+fi
+gset org.mate.background primary-color "${C[background]}"
+gset org.mate.background color-shading-type "solid"
+
+# --- MATE panel -------------------------------------------------------------------
+if have dconf; then
+  for p in $(dconf list /org/mate/panel/toplevels/ 2>/dev/null); do
+    dconf write "/org/mate/panel/toplevels/${p}background/type" "'color'"
+    dconf write "/org/mate/panel/toplevels/${p}background/color" "'${C[background]}'"
+  done
+fi
+
+# --- Terminal, launcher, notifications, compositor, TUIs --------------------------
+mkdir -p "$HOME/.config/alacritty" "$HOME/.config/rofi" "$HOME/.config/dunst" "$HOME/.config/picom" \
+         "$HOME/.config/btop/themes" "$HOME/.config/fastfetch" "$HOME/.config/zsh" "$HOME/.config/lazygit"
+cp "$state/alacritty.toml" "$HOME/.config/alacritty/theme.toml"   # Alacritty live-reloads imports
+cp "$state/rofi.rasi" "$HOME/.config/rofi/theme.rasi"
+cp "$state/dunstrc" "$HOME/.config/dunst/dunstrc"
+cp "$state/picom-colors.conf" "$HOME/.config/picom/colors.conf"
+cp "$state/btop.theme" "$HOME/.config/btop/themes/archdock.theme"
+cp "$state/fastfetch.jsonc" "$HOME/.config/fastfetch/config.jsonc"
+cp "$state/starship.toml" "$HOME/.config/starship.toml"
+cp "$state/shell-theme.zsh" "$HOME/.config/zsh/theme.zsh"
+cp "$state/lazygit.yml" "$HOME/.config/lazygit/config.yml"
+cp "$state/Xresources" "$HOME/.Xresources"
+if [[ -n ${DISPLAY:-} ]] && have xrdb; then xrdb -merge "$HOME/.Xresources" 2>/dev/null; fi
+
+# Neovim (LazyVim): the theme's colourscheme spec.
+if [[ -f ${C[theme_dir]}/neovim.lua ]]; then
+  mkdir -p "$HOME/.config/nvim/lua/plugins"
+  cp "${C[theme_dir]}/neovim.lua" "$HOME/.config/nvim/lua/plugins/theme.lua"
+fi
+
+if [[ -n ${DISPLAY:-} ]]; then
+  if pgrep -u "$USER" -x dunst >/dev/null; then
+    dunstctl reload 2>/dev/null || { pkill -u "$USER" -x dunst; (dunst >/dev/null 2>&1 &) ; }
+  fi
+  pkill -USR1 -u "$USER" -x picom 2>/dev/null || true
+  pkill -USR2 -u "$USER" -x btop 2>/dev/null || true
+fi
+
+mkdir -p "$HOME/.config/archdock"
+echo "$id" >"$HOME/.config/archdock/current-theme"
+[[ -n ${DISPLAY:-} ]] && have notify-send && notify-send -i preferences-desktop-theme "Theme" "${C[theme_name]}" 2>/dev/null
+echo "applied ${C[theme_name]}"

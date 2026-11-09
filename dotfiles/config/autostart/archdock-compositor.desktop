@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=ArchDock compositor (picom)
+Exec=/opt/archdock/bin/archdock-compositor start
+X-MATE-Autostart-Phase=Applications
+NoDisplay=true

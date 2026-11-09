@@ -1,0 +1,25 @@
+#!/bin/bash
+# archdock-gpu-probe <VULKAN_WRAPPER|VIRGL|LLVMPIPE> – run by ArchDock before
+# the desktop starts. Prints key=value lines; exit 0 even on failure.
+mode=${1:-VULKAN_WRAPPER}
+echo "mode=$mode"
+if [ "$mode" = VULKAN_WRAPPER ]; then
+  out=$(timeout 20 vulkaninfo --summary 2>&1); rc=$?
+  dev=$(printf '%s\n' "$out" | grep -m1 'deviceName' | sed 's/.*= *//')
+  if [ $rc -eq 0 ] && [ -n "$dev" ] && ! printf '%s' "$dev" | grep -qiE 'llvmpipe|lavapipe'; then
+    echo "vk_ok=1"; echo "vk_device=$dev"
+    echo "vk_api=$(printf '%s\n' "$out" | grep -m1 'apiVersion' | sed 's/.*= *//')"
+  else
+    echo "vk_ok=0"; echo "error=vulkaninfo (rc=$rc): $(printf '%s\n' "$out" | grep -m1 -iE 'error|fail' | cut -c1-160)"
+  fi
+fi
+out=$(timeout 25 glxinfo -B 2>&1); rc=$?
+r=$(printf '%s\n' "$out" | grep -m1 'OpenGL renderer string' | sed 's/.*: *//')
+v=$(printf '%s\n' "$out" | grep -m1 'OpenGL core profile version\|OpenGL version string' | sed 's/.*: *//')
+echo "gl_renderer=$r"; echo "gl_version=$v"
+if [ $rc -ne 0 ] || [ -z "$r" ]; then echo "gl_ok=0"; echo "error=glxinfo failed (rc=$rc)"; exit 0; fi
+case "$mode" in
+  VULKAN_WRAPPER) printf '%s' "$r" | grep -qi zink && echo gl_ok=1 || { echo gl_ok=0; echo "error=expected zink, got $r"; } ;;
+  VIRGL) printf '%s' "$r" | grep -qi virgl && echo gl_ok=1 || { echo gl_ok=0; echo "error=expected virgl, got $r"; } ;;
+  *) echo gl_ok=1 ;;
+esac

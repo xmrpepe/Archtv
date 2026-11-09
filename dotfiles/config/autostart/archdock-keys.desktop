@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=ArchDock keybindings (sxhkd)
+Exec=env SXHKD_SHELL=/bin/sh PATH=/opt/archdock/bin:/usr/local/bin:/usr/bin sxhkd
+NoDisplay=true
