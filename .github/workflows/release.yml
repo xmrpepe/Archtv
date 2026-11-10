@@ -1,0 +1,42 @@
+# Publishes the APK committed under release/ as a GitHub Release when a
+# version tag (v*) is pushed. The APK itself is built locally with the
+# scripts in scripts/ + ./gradlew assembleRelease (the native builds need
+# ~30 min and several toolchains), then committed before tagging.
+name: Release APK
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (must already exist)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Check the APK
+        run: |
+          ls -l release/*.apk
+          sha256sum release/*.apk | tee release/SHA256SUMS
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" release/*.apk release/SHA256SUMS --clobber
+          else
+            gh release create "$TAG" release/*.apk release/SHA256SUMS \
+              --title "ArchDock ${TAG#v}" --notes-file release/README.md --latest
+          fi
