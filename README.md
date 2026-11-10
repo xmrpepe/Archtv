@@ -148,6 +148,18 @@ export ANDROID_HOME=~/Android/Sdk
 | Super + K | Cheatsheet |
 | Print / Shift+Print / Alt+Print | Screenshot region / screen / window |
 
+### Bluetooth keyboard and mouse
+
+Home → **Keyboard & mouse** (also in Settings → Input, and the **BT** key on
+the trackpad screen) scans for Bluetooth keyboards, mice and controllers —
+classic Bluetooth and Bluetooth LE (HID over GATT) — and pairs them. Put the
+device in pairing mode first; Android shows its own pairing dialog (keyboards
+may ask you to type a code). Once paired, Android connects it as an input
+device and ArchDock forwards its keys and pointer to the desktop, with the
+Meta/Windows key as Super. The screen also lists connected keyboards/mice and
+can forget paired ones. It needs the *Nearby devices* permission, which is
+declared `neverForLocation`.
+
 Window and workspace keys are Marco's (`config/dconf/archdock.dconf`);
 launchers are sxhkd (`config/sxhkd/sxhkdrc`). On the phone, the **Super**,
 Ctrl, Alt and Shift buttons are sticky modifiers for the next key; Launcher,

@@ -24,6 +24,7 @@ import dev.archdock.graph
 import dev.archdock.input.ControlActivity
 import dev.archdock.session.Phase
 import dev.archdock.session.SessionService
+import dev.archdock.ui.screens.BluetoothScreen
 import dev.archdock.ui.screens.GpuTestScreen
 import dev.archdock.ui.screens.HomeScreen
 import dev.archdock.ui.screens.InstallerScreen
@@ -35,7 +36,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-enum class Route { HOME, INSTALLER, SETTINGS, GPU_TEST, LOGS, TERMINAL }
+enum class Route { HOME, INSTALLER, SETTINGS, GPU_TEST, LOGS, TERMINAL, BLUETOOTH }
 
 class MainActivity : ComponentActivity() {
     private var route by mutableStateOf(Route.HOME)
@@ -57,6 +58,7 @@ class MainActivity : ComponentActivity() {
                     Route.GPU_TEST -> GpuTestScreen(onBack = { route = Route.HOME })
                     Route.LOGS -> LogsScreen(onBack = { route = Route.HOME })
                     Route.TERMINAL -> TerminalScreen(onBack = { route = Route.HOME })
+                    Route.BLUETOOTH -> BluetoothScreen(onBack = { route = Route.HOME })
                 }
             }
         }
@@ -72,6 +74,7 @@ class MainActivity : ComponentActivity() {
     private fun handleIntent(intent: Intent?) {
         when (intent?.getStringExtra(EXTRA_ROUTE)) {
             "terminal" -> route = Route.TERMINAL
+            "bluetooth" -> route = Route.BLUETOOTH
             "settings" -> route = Route.SETTINGS
             "home" -> route = Route.HOME
         }

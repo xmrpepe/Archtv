@@ -123,6 +123,10 @@ class ControlActivity : ComponentActivity() {
                 Key("Term") { g.input.chord(KeyMap.EV_LEFTMETA, KeyMap.EV_ENTER) }
                 Key("Close") { g.input.chord(KeyMap.EV_LEFTMETA, 17 /* W */) }
                 Key("PrtSc") { g.input.chord(KeyMap.EV_PRINT) }
+                Key("BT") {
+                    startActivity(android.content.Intent(this@ControlActivity, dev.archdock.ui.MainActivity::class.java)
+                        .putExtra(dev.archdock.ui.MainActivity.EXTRA_ROUTE, "bluetooth"))
+                }
                 Key("Stop", color = TokyoNight.red) { SessionService.send(this@ControlActivity, SessionService.ACTION_STOP); finish() }
             }
             Box(Modifier.weight(1f).fillMaxWidth().padding(8.dp)) {

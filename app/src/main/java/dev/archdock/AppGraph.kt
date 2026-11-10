@@ -3,6 +3,7 @@ package dev.archdock
 import android.content.Context
 import dev.archdock.audio.AudioBridge
 import dev.archdock.backup.BackupManager
+import dev.archdock.bluetooth.BluetoothInputManager
 import dev.archdock.core.Logs
 import dev.archdock.core.Paths
 import dev.archdock.display.DisplayWatcher
@@ -33,6 +34,7 @@ class AppGraph(val context: Context, val paths: Paths) {
     val perf = PerfMonitor(context)
     val backup = BackupManager(context, paths)
     val terminal = TerminalSession(proot)
+    val bluetooth = BluetoothInputManager(context)
     val input = InputBridge(paths) { text -> typeViaXdotool(text) }
     val session = SessionController(context, paths, proot, settings, gpu, audio, input, perf, scope)
 

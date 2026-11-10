@@ -149,6 +149,11 @@ fun SettingsScreen(onBack: () -> Unit, onNavigate: (Route) -> Unit) {
                 }
             }
 
+            Panel(title = "Input") {
+                Text("Pair a Bluetooth keyboard and mouse; the Meta/Windows key acts as Super.", color = TokyoNight.fgDark, fontSize = 12.sp)
+                OutlinedButton(onClick = { onNavigate(Route.BLUETOOTH) }) { Text("Bluetooth keyboard & mouse") }
+            }
+
             Panel(title = "Compositor & performance") {
                 Toggle("Compositor (picom)", s.compositor) { v -> update { it.copy(compositor = v) }; compositorChanged(c = v) }
                 Toggle("Blur", s.blur, enabled = s.compositor) { v -> update { it.copy(blur = v) }; compositorChanged(b = v) }

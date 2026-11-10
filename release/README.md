@@ -1,9 +1,9 @@
 # ArchDock 0.1.0 – release APK
 
-`ArchDock-0.1.0-arm64-v8a-release.apk` (x11 flavor: embedded Termux:X11, proot,
+`ArchDock-0.1.0-arm64-v8a-release.apk` (x11 flavor: embedded Termux:X11, proot, Bluetooth pairing,
 virglrenderer + Mesa wrapper GPU server). arm64-v8a only, Android 12+ (minSdk 31).
 
-* SHA-256: `d3e191d1e1829d280289ac59e4ec86ea4311f5aed9cda9bea68d6c1b26183e56`
+* SHA-256: `82926a44fc5399d4d58ec08c865e6f40f931e653ddaddc0684dc0ab315296622`
 * Signed with the **Android debug key** (no release keystore was configured),
   so it installs directly but can't be updated in place by a build signed with
   a different key – uninstall first in that case.

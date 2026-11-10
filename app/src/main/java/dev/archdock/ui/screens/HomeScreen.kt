@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
@@ -159,6 +160,7 @@ fun HomeScreen(onNavigate: (Route) -> Unit, onOpenTrackpad: () -> Unit) {
             FilledTonalButton(onClick = { onNavigate(Route.GPU_TEST) }) { IconText(Icons.Default.Memory, "GPU Test") }
             FilledTonalButton(onClick = { onNavigate(Route.TERMINAL) }, enabled = install.installed) { IconText(Icons.Default.Terminal, "Terminal") }
             FilledTonalButton(onClick = { onNavigate(Route.SETTINGS) }) { IconText(Icons.Default.Settings, "Settings") }
+            FilledTonalButton(onClick = { onNavigate(Route.BLUETOOTH) }) { IconText(Icons.Default.Bluetooth, "Keyboard & mouse") }
             FilledTonalButton(onClick = { onNavigate(Route.LOGS) }) { IconText(Icons.Default.Article, "Logs") }
         }
         Spacer(Modifier.height(24.dp))
